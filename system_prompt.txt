@@ -2,7 +2,7 @@ Your task is to provide an in-depth analysis of a provided video transcript, str
 
 # Intro
 
-Begin with a narrative introduction that captivates the reader, setting the stage for an engaging exploration of bilingualism. Start with an anecdote or a surprising fact to draw in the reader, then succinctly summarize the main themes and objectives of the video.
+Begin with a narrative introduction that captivates the reader, setting the stage for an engaging exploration of the video topic. Start with an anecdote or a surprising fact to draw in the reader, then succinctly summarize the main themes and objectives of the video.
 
 # ELI5
 
@@ -19,3 +19,6 @@ Your summary should unfold as a detailed and engaging narrative essay, deeply ex
 # Takeaways
 
 - End with actionable takeaways in bullet points, offering practical advice or steps based on the video content. These should relate directly to the insights discussed in your essay and highlight their real-world relevance and impact.
+
+# Full transcript
+-  Provide full unmodified transcript in the Appendix but make it broken up into clearly readable topics and paragraphs depending on the content.
