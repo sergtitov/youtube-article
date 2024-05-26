@@ -1,9 +1,24 @@
+from typing import Union
 import yt_dlp
-
+import argparse
+import os
+from subprocess import run
+from openai import OpenAI
 
 AUDIO_FORMAT = "mp3"
 PREFERRED_QUALITY = "96"
 MAX_FILESIZE = 25 * 1024 * 1024  # 25MB
+FFMPEG_AUDIO_CHANNELS = "1"  # Mono
+FFMPEG_BITRATE = "32k"
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+USER_PROMPT = """Transcript: {}"""
+
+def load_prompt(filename: str) -> str:
+    with open(filename, "r") as f:
+        return f.read()
 
 def download_audio_from_youtube(url):
     """Downloads audio from the given YouTube URL and returns the filename."""
@@ -35,9 +50,6 @@ def download_audio_from_youtube(url):
     # Strip the extension from the filename to use it for further processing
     if filename:
         return filename.rsplit(".", 1)[0]
-    
-FFMPEG_AUDIO_CHANNELS = "1"  # Mono
-FFMPEG_BITRATE = "32k"
 
 def convert_audio_to_mono(audio_filename):
     """Converts the downloaded audio file to mono format with lower bitrate."""
@@ -53,10 +65,6 @@ def convert_audio_to_mono(audio_filename):
         f"{audio_filename}_mono.{AUDIO_FORMAT}",
     ]
     run(command)
-    
-from openai import OpenAI
-
-client = OpenAI(api_key="your_api_key_here")
 
 def transcribe_audio(audio_filename):
     with open(f"{audio_filename}_mono.{AUDIO_FORMAT}", "rb") as audio_file:
@@ -64,7 +72,6 @@ def transcribe_audio(audio_filename):
             model="whisper-1", file=audio_file, response_format="text"
         )
     return transcription
-
 
 def summarize_transcript(transcript, system_prompt, user_prompt_template):
     summarize_prompt = user_prompt_template.format(transcript)
@@ -82,39 +89,37 @@ def summarize_transcript(transcript, system_prompt, user_prompt_template):
     )
     return response.choices[0].message.content
 
-import argparse
-import os
-import uuid
-from subprocess import run
-
-
-def main():
+def main(url: Union[str, None]):
     """Main function to parse arguments and orchestrate the summarization of a YouTube video."""
-    parser = argparse.ArgumentParser(description="Summarize YouTube videos.")
-    parser.add_argument(
-        "url", type=str, help="The URL of the YouTube video to summarize."
-    )
-    args = parser.parse_args()
+    if not url:
+        parser = argparse.ArgumentParser(description="Summarize YouTube videos.")
+        parser.add_argument(
+            "url", type=str, help="The URL of the YouTube video to summarize."
+        )
+        args = parser.parse_args()
+        url = args.url.replace("\\", "")
 
     try:
-        url = args.url.replace("\\", "")
         audio_filename = download_audio_from_youtube(url)
         convert_audio_to_mono(audio_filename)
         transcript = transcribe_audio(audio_filename)
         with open(f"{audio_filename}.txt", "w") as f:
             f.write(transcript)
-        summary = summarize_transcript(transcript, SYSTEM_PROMPT, USER_PROMPT_TEMPLATE)
+        system_prompt = load_prompt("system_prompt.txt")
+        user_prompt = USER_PROMPT.format(transcript)
+        summary = summarize_transcript(transcript, system_prompt, user_prompt)
         # save the summary to a file
         with open(f"{audio_filename}_summary.md", "w") as f:
             f.write(summary)
     finally:
+        pass
         # Cleanup downloaded and processed files only if they exist
-        if os.path.exists(f"{audio_filename}.{AUDIO_FORMAT}"):
-            os.remove(f"{audio_filename}.{AUDIO_FORMAT}")
-        if os.path.exists(f"{audio_filename}_mono.{AUDIO_FORMAT}"):
-            os.remove(f"{audio_filename}_mono.{AUDIO_FORMAT}")
+        # if os.path.exists(f"{audio_filename}.{AUDIO_FORMAT}"):
+        #     os.remove(f"{audio_filename}.{AUDIO_FORMAT}")
+        # if os.path.exists(f"{audio_filename}_mono.{AUDIO_FORMAT}"):
+        #     os.remove(f"{audio_filename}_mono.{AUDIO_FORMAT}")
+
+url = "https://www.youtube.com/watch?v=BT6Aw6Q75Yg"
 
 if __name__ == "__main__":
-    main()
-
-
+    main(url)
