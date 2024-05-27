@@ -1,2 +1,6 @@
 yt_dlp
 openai
+ffmpeg
+openai-whisper
+Pillow
+ImageHash
