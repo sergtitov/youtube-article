@@ -21,6 +21,7 @@ def load_prompt(filename: str) -> str:
 
 def download_audio_from_youtube(url, title):
     """Downloads audio from the given YouTube URL and returns the filename."""
+    print(f"Downloading audio from {url}")
     filename = None
 
     def my_hook(d):
@@ -52,6 +53,7 @@ def download_audio_from_youtube(url, title):
 
 def convert_audio_to_mono(audio_filename):
     """Converts the downloaded audio file to mono format with lower bitrate."""
+    print(f"Converting audio to mono for {audio_filename}")
     command = [
         "ffmpeg",
         "-i",
@@ -66,6 +68,7 @@ def convert_audio_to_mono(audio_filename):
     run(command)
 
 def transcribe_audio(audio_filename):
+    print(f"Transcribing audio for {audio_filename}")
     with open(f"{audio_filename}_mono.{AUDIO_FORMAT}", "rb") as audio_file:
         transcription = client.audio.transcriptions.create(
             model="whisper-1", file=audio_file, response_format="text"
@@ -87,11 +90,13 @@ def call_model(system_prompt: str, user_prompt: str, model: str = "gpt-4o") -> s
     return response.choices[0].message.content
 
 def summarize_transcript(transcript):
+    print(f"Summarizing transcript for {transcript}")
     system_prompt = load_prompt("summarization_prompt.txt")
     user_prompt_template = USER_PROMPT.format(transcript)
     return call_model(system_prompt, user_prompt_template)
 
 def provide_full_transcription(transcript):
+    print(f"Generating full transcription for {transcript}")
     system_prompt = load_prompt("transcription_prompt.txt")
     user_prompt_template = USER_PROMPT.format(transcript)
     return call_model(system_prompt, user_prompt_template)
@@ -150,8 +155,11 @@ def main(url: Union[str, None], title: Union[str, None]):
 # url = "https://www.youtube.com/watch?v=BT6Aw6Q75Yg"
 # title = "All Learning Algorithms Explained in 14 Minutes"
 
-url = "https://www.youtube.com/watch?v=_ArVh3Cj9rw"
-title = "The Future Of Reasoning"
+# url = "https://www.youtube.com/watch?v=_ArVh3Cj9rw"
+# title = "The Future Of Reasoning"
+
+url = "https://www.youtube.com/watch?v=XLY7lPSk9EE"
+title = "Move to Dubai or Panama"
 
 if __name__ == "__main__":
     main(url, title)            
