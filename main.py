@@ -200,8 +200,8 @@ def call_model(system_prompt: str, user_prompt: str, model: str = "gpt-4o") -> s
     return response.choices[0].message.content
 
 def summarize_transcript(transcript):
-    print(f"Summarizing transcript for {transcript}")
-    system_prompt = load_prompt("summarization_prompt.txt")
+    print(f"Summarizing transcript...")
+    system_prompt = load_prompt("summarization_prompt.md")
     user_prompt_template = USER_PROMPT.format(transcript)
     return call_model(system_prompt, user_prompt_template)
 
@@ -277,15 +277,15 @@ def main(url: Union[str, None], title: Union[str, None]):
             print("Failed to obtain transcript.")
             return
 
-        def read_or_summarize(file_path, summarize_func, *args):
+        def generate_if_absent(file_path, summarize_func, *args):
             if not os.path.exists(file_path):
                 content = summarize_func(*args)
                 with open(file_path, "w") as f:
                     f.write(content)
 
         transcript_text = transcript["text"]
-        read_or_summarize(f"{audio_filename}_summary.md", summarize_transcript, transcript_text)
-        read_or_summarize(f"{audio_filename}_full.md", provide_full_transcription, transcript_text)
+
+        generate_if_absent(f"{audio_filename}_summary.md", summarize_transcript, transcript_text)
 
         # Integrate screenshots into the full transcript
         transcript_with_screenshots = integrate_screenshots(transcript, title)
@@ -293,9 +293,7 @@ def main(url: Union[str, None], title: Union[str, None]):
             f.write(transcript_with_screenshots)
 
         # Apply full transcription formatting to the markdown with screenshots
-        formatted_transcript_with_screenshots = provide_full_transcription(transcript_with_screenshots)
-        with open(f"{audio_filename}_formatted_with_screenshots.md", "w") as f:
-            f.write(formatted_transcript_with_screenshots)
+        generate_if_absent(f"{audio_filename}_formatted_with_screenshots.md", provide_full_transcription, transcript_with_screenshots)        
     finally:
         pass
         # Cleanup downloaded and processed files only if they exist

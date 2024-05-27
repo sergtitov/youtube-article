@@ -9,6 +9,6 @@ Provide the title of the video
 # Details
 
 Follow with the transctipt broken up into sections with each having a title.
-Take into account that the input will be in markdown with screenshots inside the text like this: ![Screenshot](screenshots/screenshot_10.png). You need to preserve them in your output.
-Make sure to break the text into readable paragraphs.
+Take into account that the input will be in markdown with screenshots inside the text like this: ![Screenshot](screenshots/screenshot_10.png). You need to preserve them in your output but make sure that they don't break paragraphs.
+Make sure to break the text into readable and SHORT paragraphs.
 Use markdown for output.
