@@ -1,0 +1,11 @@
+# Full transcript
+
+Your task is to take in a full video transcript as a text blob and return full unmodified transcript but make it broken up into clearly readable topics and paragraphs depending on the content.
+
+# Title
+
+Provide the title of the video
+
+# Details
+
+Follow with the transctipt broken up into sections with each having a title. Use markdown.

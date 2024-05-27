@@ -72,15 +72,12 @@ def transcribe_audio(audio_filename):
         )
     return transcription
 
-def summarize_transcript(transcript):
-    system_prompt = load_prompt("system_prompt.txt")
-    user_prompt_template = USER_PROMPT.format(transcript)
-
+def call_model(system_prompt: str, user_prompt: str, model: str = "gpt-4o") -> str:
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=model,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt_template},
+            {"role": "user", "content": user_prompt},
         ],
         temperature=0,
         top_p=1,
@@ -88,6 +85,17 @@ def summarize_transcript(transcript):
         presence_penalty=0,
     )
     return response.choices[0].message.content
+
+def summarize_transcript(transcript):
+    system_prompt = load_prompt("summarization_prompt.txt")
+    user_prompt_template = USER_PROMPT.format(transcript)
+    return call_model(system_prompt, user_prompt_template)
+
+def provide_full_transcription(transcript):
+    system_prompt = load_prompt("transcription_prompt.txt")
+    user_prompt_template = USER_PROMPT.format(transcript)
+    return call_model(system_prompt, user_prompt_template)
+
 
 def main(url: Union[str, None], title: Union[str, None]):
     """Main function to parse arguments and orchestrate the summarization of a YouTube video."""
@@ -111,18 +119,26 @@ def main(url: Union[str, None], title: Union[str, None]):
         if not os.path.exists(f"{audio_filename}_mono.{AUDIO_FORMAT}"):
             convert_audio_to_mono(audio_filename)
 
-        if not os.path.exists(f"{audio_filename}.txt"):
-            transcript = transcribe_audio(audio_filename)
-            with open(f"{audio_filename}.txt", "w") as f:
-                f.write(transcript)
-        else:
-            with open(f"{audio_filename}.txt", "r") as f:
-                transcript = f.read()
+        def read_or_transcribe(file_path, transcribe_func, *args):
+            if not os.path.exists(file_path):
+                content = transcribe_func(*args)
+                with open(file_path, "w") as f:
+                    f.write(content)
+            else:
+                with open(file_path, "r") as f:
+                    content = f.read()
+            return content
 
-        if not os.path.exists(f"{audio_filename}_summary.md"):
-            summary = summarize_transcript(transcript)
-            with open(f"{audio_filename}_summary.md", "w") as f:
-                f.write(summary)
+        transcript = read_or_transcribe(f"{audio_filename}.txt", transcribe_audio, audio_filename)
+
+        def read_or_summarize(file_path, summarize_func, *args):
+            if not os.path.exists(file_path):
+                content = summarize_func(*args)
+                with open(file_path, "w") as f:
+                    f.write(content)
+
+        read_or_summarize(f"{audio_filename}_summary.md", summarize_transcript, transcript)
+        read_or_summarize(f"{audio_filename}_full.md", provide_full_transcription, transcript)
     finally:
         pass
         # Cleanup downloaded and processed files only if they exist
@@ -131,8 +147,11 @@ def main(url: Union[str, None], title: Union[str, None]):
         # if os.path.exists(f"{audio_filename}_mono.{AUDIO_FORMAT}"):
         #     os.remove(f"{audio_filename}_mono.{AUDIO_FORMAT}")
 
-url = "https://www.youtube.com/watch?v=BT6Aw6Q75Yg"
-title = "All Learning Algorithms Explained in 14 Minutes"
+# url = "https://www.youtube.com/watch?v=BT6Aw6Q75Yg"
+# title = "All Learning Algorithms Explained in 14 Minutes"
+
+url = "https://www.youtube.com/watch?v=_ArVh3Cj9rw"
+title = "The Future Of Reasoning"
 
 if __name__ == "__main__":
     main(url, title)            
