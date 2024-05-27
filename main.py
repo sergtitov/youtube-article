@@ -285,7 +285,8 @@ def main(url: Union[str, None], title: Union[str, None]):
 
         transcript_text = transcript["text"]
 
-        generate_if_absent(f"{audio_filename}_summary.md", summarize_transcript, transcript_text)
+        summary_file = f"{audio_filename}_summary.md"
+        generate_if_absent(summary_file, summarize_transcript, transcript_text)
 
         # Integrate screenshots into the full transcript
         transcript_with_screenshots = integrate_screenshots(transcript, title)
@@ -293,7 +294,18 @@ def main(url: Union[str, None], title: Union[str, None]):
             f.write(transcript_with_screenshots)
 
         # Apply full transcription formatting to the markdown with screenshots
-        generate_if_absent(f"{audio_filename}_formatted_with_screenshots.md", provide_full_transcription, transcript_with_screenshots)        
+        formatted_with_screenshots_file = f"{audio_filename}_formatted_with_screenshots.md"
+        generate_if_absent(formatted_with_screenshots_file, provide_full_transcription, transcript_with_screenshots)
+
+        # Combine summary and transcription with screenshots
+        combined_file = f"{audio_filename}_combined.md"
+        with open(summary_file, "r") as sf, open(formatted_with_screenshots_file, "r") as ff:
+            summary_content = sf.read()
+            formatted_content = ff.read()
+        combined_content = f"# {title}\n\n{summary_content}\n\n{formatted_content}"
+        with open(combined_file, "w") as cf:
+            cf.write(combined_content)
+
     finally:
         pass
         # Cleanup downloaded and processed files only if they exist
@@ -309,8 +321,11 @@ def main(url: Union[str, None], title: Union[str, None]):
 # url = "https://www.youtube.com/watch?v=_ArVh3Cj9rw"
 # title = "The Future Of Reasoning"
 
-url = "https://www.youtube.com/watch?v=XLY7lPSk9EE"
-title = "Move to Dubai or Panama"
+# url = "https://www.youtube.com/watch?v=XLY7lPSk9EE"
+# title = "Move to Dubai or Panama"
+
+url = "https://www.youtube.com/watch?v=uRVwWsFIGMM"
+title = "Did Seiko Improve their BEST VALUED Watch"
 
 if __name__ == "__main__":
     main(url, title)

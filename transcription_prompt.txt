@@ -2,13 +2,12 @@
 
 Your task is to take in a full video transcript as a text blob and return full unmodified transcript but make it broken up into clearly readable topics and paragraphs depending on the content.
 
-# Title
-
-Provide the title of the video
-
 # Details
 
-Follow with the transctipt broken up into sections with each having a title.
+Use markdown for output.
+Follow with the transctipt broken up into sections with each having a section title. 
+Each section should be level 2 header like "## Header"
+Do not provide the overall title, just sections.
 Take into account that the input will be in markdown with screenshots inside the text like this: ![Screenshot](screenshots/screenshot_10.png). You need to preserve them in your output but make sure that they don't break paragraphs.
 Make sure to break the text into readable and SHORT paragraphs.
-Use markdown for output.
+
