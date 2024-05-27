@@ -15,7 +15,7 @@ PREFERRED_QUALITY = "96"
 MAX_FILESIZE = 25 * 1024 * 1024  # 25MB
 FFMPEG_AUDIO_CHANNELS = "1"  # Mono
 FFMPEG_BITRATE = "32k"
-SCREENSHOT_INTERVAL = 10  # Capture a screenshot every 10 seconds
+SCREENSHOT_INTERVAL = 5  # Capture a screenshot every 5 seconds
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -121,7 +121,7 @@ def hash_image(image_path):
         return imagehash.average_hash(img)
     
 
-def deduplicate_screenshots(temp_dir, screenshots_dir, interval, hash_threshold=20):
+def deduplicate_screenshots(temp_dir, screenshots_dir, interval, hash_threshold=5):
     if os.path.exists(screenshots_dir):
         return
 
@@ -177,7 +177,7 @@ def download_video_and_extract_screenshots(url, title, video_filename):
     if not os.path.exists(f"{video_filename}.webm"):
         print(f"Downloading video for {title}")
         ydl_opts = {
-            "outtmpl": f"results/{title}/{title}.%(ext)s",
+            "outtmpl": f"results/{title}/{title}.webm",
             "format": "bestvideo[height<=1080]",
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -324,8 +324,12 @@ def main(url: Union[str, None], title: Union[str, None]):
 # url = "https://www.youtube.com/watch?v=XLY7lPSk9EE"
 # title = "Move to Dubai or Panama"
 
-url = "https://www.youtube.com/watch?v=uRVwWsFIGMM"
-title = "Did Seiko Improve their BEST VALUED Watch"
+# url = "https://www.youtube.com/watch?v=uRVwWsFIGMM"
+# title = "Did Seiko Improve their BEST VALUED Watch"
+
+url = "https://www.youtube.com/watch?v=raBqhEzT9VE"
+title = "8 Best Supplements to Build Muscle 2024"
+
 
 if __name__ == "__main__":
     main(url, title)
